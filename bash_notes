@@ -1,0 +1,61 @@
+#Alias to create a note file
+#This function create or opens an existing note file and rearranges the actions and comments
+#The actions are prefix with * and the comments are prefix with -
+
+#The alias creates check box [] when an action * is added to the note
+#Action items that are completed can be annotated as [x]
+
+#project names can vary, try to handle all potential name variations
+#note name 'test' can be varied in the foloowing ways: test_note.txt, test_note, test
+note (){
+	#set where to place the notes
+        note_path="${HOME}/Desktop"
+
+        #the argument is the name of the note to create or open
+        name="${1/_note.txt/}"
+
+        #adding a common '_note.txt' to the note name for uniformity
+        file_name="${note_path}/${name}_note.txt"
+
+	note_name="${name}_note.txt"
+
+        #if the note already exists then just open it
+        if [[ -f ${file_name} ]];
+        then
+                vim ${file_name}
+
+	elif [[ -f ${name} ]];
+	then
+		file_name=${name}
+		vim ${name}
+ 
+        #if the file doesn't exists, create the title banner which has date, time and title
+        #this grabs the notes_template to create the banner
+        else
+                sed "s/date:/date: $(date +%m-%d-%Y)/g; s/time:/time:$(date +%H:%M:%S)/g" ${HOME}/Desktop/action_notes/template/notes_template.txt > ${file_name}
+                vim ${file_name}
+        fi
+
+        #create a temp variable to create a file  to use for moving the data and rearranging
+        temp_file="/tmp/${note_name}.$$"
+
+        #check if the temp file already exists, if not then create it
+        if [[ ! -f ${temp_file} ]];
+        then
+                touch ${temp_file}
+        fi
+
+        #move the banner and all the notes to the top and push to the temp file
+	grep -v '\*' ${file_name} > ${temp_file}
+
+        #truncate all the notes to the bottom of the temp file
+	grep '\*' ${file_name} >> ${temp_file}
+
+	sed 's/*/[]/g' ${temp_file} > ${file_name}
+
+        #move the rearranged note from the temp to the original note file
+        #cp -f "${note_path}" "${file_name}"
+
+        #remove the temp file
+	rm "${temp_file}"
+}
