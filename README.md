@@ -1,2 +1,2 @@
-# bash_notes
-A bash file to track and add notes and action items 
+# bash_notes :green_book:
+A bash file to track tasks, add notes and action items 
